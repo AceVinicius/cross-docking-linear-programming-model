@@ -1,0 +1,12 @@
+./main R101.txt
+./main R102.txt
+./main R103.txt
+./main R104.txt
+./main R105.txt
+./main R106.txt
+./main R107.txt
+./main R108.txt
+./main R109.txt
+./main R110.txt
+./main R111.txt
+./main R112.txt
