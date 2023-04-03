@@ -5,9 +5,12 @@ import model
 
 
 if __name__ == '__main__':
-    for i, instance in enumerate(sys.argv):
-        if i == 0:
-            continue
+    if len(sys.argv) == 1:
+        print(f"usage: {sys.argv[0]} [...instances]")
+    else:
+        for i, instance in enumerate(sys.argv):
+            if i == 0:
+                continue
 
-        print(f"\n\n---------------( Instance {i} )---------------\n")
-        model.solve_cross_docking_model(instance)
+            print(f"\n\n---------------( Instance {i} )---------------\n")
+            model.solve_cross_docking_model(instance)
