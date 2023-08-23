@@ -4,6 +4,7 @@ import os
 
 from setuptools import setup
 
+
 setup(
     name="cross-docking-project",
     version="0.0.1",
