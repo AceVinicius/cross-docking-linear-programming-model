@@ -2,26 +2,45 @@ from typing import List, Dict
 
 import gurobipy as gp
 
-from src.cross_docking_model.__conversions import create_label, create_dict_from_array, create_dict_from_2d_matrix, \
+from cross_docking_model.__conversions import create_label, create_dict_from_array, create_dict_from_2d_matrix, \
     create_dict_from_3d_matrix
 
 
 class CrossDockingSolver:
     __modes: List = ["single", "multi", "msp", "r-e"]
 
-    def __init__(self, data: Dict, time_unit: int = 1, mode: str = 'single', alpha: float = 0.5, epsilon: float = 0.5):
+    mode: str
+
+
+    def __init__(self, data: Dict, mode: str = 'single', time_limit: float = float('inf'), alpha: float = 0.5, epsilon: float = 0.5, time_unit: int = 1, log: str = ""):
         if time_unit <= 0:
             raise ValueError("time_unit must be an integer greater than 0: " + str(time_unit))
+        
         if mode not in self.__modes:
             raise ValueError("mode does not exist: " + mode)
+        
         if alpha < 0 or alpha > 1:
             raise ValueError("alpha must be a float between 0.0 and 1.0:" + str(alpha))
+        
         if epsilon < 0:
             raise ValueError("epsilon must a float greater than 0: " + str(epsilon))
 
         self.mode = mode
-        self.model = gp.Model("Cross-Docking Model - " + mode)
+        
+        self.__setup_solver(data, time_limit, log)
+        self.__build_model(data, time_unit, alpha, epsilon)
 
+
+    def __setup_solver(self, data: Dict, time_limit: float, log: str):
+        self.model = gp.Model("Cross-Docking Model - " + self.mode)
+
+        self.model.Params.TimeLimit = time_limit
+
+        if (log != ""):
+            self.model.Params.LogFile = log + "/" + data["instance"]
+
+
+    def __build_model(self, data: Dict, time_unit: int, alpha: float, epsilon: float):
         # Create labels
         products = create_label("product", data['number_of_products'])
         suppliers = create_label("supplier", data['number_of_suppliers'])
@@ -50,9 +69,9 @@ class CrossDockingSolver:
         CT_ = data['changeover_time']
 
         M = 1000
-        CO = time_unit  # 1
-        CE = time_unit  # 1
-        CL = time_unit  # 1
+        CO = time_unit
+        CE = time_unit
+        CL = time_unit
         T_max = 400
 
         # Create variables
@@ -74,29 +93,6 @@ class CrossDockingSolver:
         t_np1 = self.model.addVar(name="t_n-plus-1", vtype=gp.GRB.CONTINUOUS)
         et = self.model.addVars(customers, name="et", vtype=gp.GRB.CONTINUOUS)
         lt = self.model.addVars(customers, name="lt", vtype=gp.GRB.CONTINUOUS)
-
-        # Set objective(s)
-
-        obj_1 = gp.quicksum(CT[i, j] * x[i, j] for i in customers[:-1] for j in customers[1:] if i != j) + gp.quicksum(
-            CE * et[i] for i in customers[1:-1]) + gp.quicksum(CL * lt[i] for i in customers[1:-1]) + CO * dt_max
-        obj_2 = gp.quicksum((CAP * x["c_inbound_dock", j] - gp.quicksum(
-            Q[i] * v[i, j] for i in customers[1:-1] if i != j) + Q[j] * x["c_inbound_dock", j]) / CAP for j in
-                            customers[1:-1])
-
-        if self.mode == 'single':
-            self.model.setObjective(obj_1, sense=gp.GRB.MAXIMIZE)
-
-        elif self.mode == 'multi':
-            self.model.setObjectiveN(obj_1, 0, weight=1.0)
-            self.model.setObjectiveN(obj_2, 1, weight=1.0)
-
-        elif self.mode == 'msp':
-            mi = 0.1 * 1000  # solve the model and use the value here?
-
-            self.model.setObjective((1 - alpha) * obj_1 + alpha * mi * obj_2, sense=gp.GRB.MAXIMIZE)
-
-        elif self.mode == 'r-e':
-            pass
 
         # Add constraints
         # Constraint 1: Each inbound load is assigned to one supplier
@@ -347,6 +343,31 @@ class CrossDockingSolver:
 
         self.model.addConstr(t_np1 <= T_max, name="24")
 
+
+        # Set objective
+        oc = gp.quicksum(CT[i, j] * x[i, j] for i in customers[:-1] for j in customers[1:] if i != j) + gp.quicksum(
+            CE * et[i] for i in customers[1:-1]) + gp.quicksum(CL * lt[i] for i in customers[1:-1]) + CO * dt_max
+        nv = gp.quicksum((CAP * x["c_inbound_dock", j] - gp.quicksum(
+            Q[i] * v[i, j] for i in customers[1:-1] if i != j) + Q[j] * x["c_inbound_dock", j]) / CAP for j in
+                            customers[1:-1])
+
+        self.model.ModelSense = gp.GRB.MINIMIZE
+
+        if self.mode == 'single':
+            self.model.setObjectiveN(oc, index=0, priority=1, name="CO")
+
+        elif self.mode == 'multi':
+            self.model.setObjectiveN(oc, index=0, priority=1, name="CO")
+            self.model.setObjectiveN(nv, index=1, priority=1, name="NV")
+
+        elif self.mode == 'msp':
+            oc_best = 1  # solve for alpha = 1
+            nv_best = 1  # solve for alpha = 0
+
+            self.model.setObjectiveN(oc / oc_best, index=0, weight=(1 - alpha), priority=1, name="CO")
+            self.model.setObjectiveN(nv / nv_best, index=1, weight=(alpha)    , priority=1, name="NV")
+
+
     def solve(self) -> None:
         self.model.optimize()
 
@@ -355,13 +376,17 @@ class CrossDockingSolver:
             print(f"Optimal objective value(s):")
             if self.mode == 'single':
                 print(f"Objective 1: {self.model.objVal:.4f}")
+
             elif self.mode == 'multi':
                 print(f"Objective 1: {self.model.getObjective(0).getValue():.4f}")
                 print(f"Objective 2: {self.model.getObjective(1).getValue():.4f}")
+
             for v in self.model.getVars():
                 print(f"{v.varName}: {v.x:.4f}")
+
         else:
             print("Optimization terminated with status " + str(self.model.status))
+
 
     def clear(self) -> None:
         self.model.dispose()
