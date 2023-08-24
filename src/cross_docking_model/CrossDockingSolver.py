@@ -12,32 +12,31 @@ class CrossDockingSolver:
     mode: str
 
 
-    def __init__(self, data: Dict, mode: str = 'single', time_limit: float = float('inf'), alpha: float = 0.5, epsilon: float = 0.5, time_unit: int = 1, log: str = ""):
+    def __init__(self, data: Dict, mode: str, time_limit: float, time_unit: int, output: str, alpha: float = 0.5, epsilon: float = 0.5):
         if time_unit <= 0:
             raise ValueError("time_unit must be an integer greater than 0: " + str(time_unit))
-        
+
         if mode not in self.__modes:
             raise ValueError("mode does not exist: " + mode)
-        
+
         if alpha < 0 or alpha > 1:
             raise ValueError("alpha must be a float between 0.0 and 1.0:" + str(alpha))
-        
+
         if epsilon < 0:
             raise ValueError("epsilon must a float greater than 0: " + str(epsilon))
 
         self.mode = mode
-        
-        self.__setup_solver(data, time_limit, log)
+
+        self.__setup_solver(data, time_limit, output)
         self.__build_model(data, time_unit, alpha, epsilon)
 
 
-    def __setup_solver(self, data: Dict, time_limit: float, log: str):
+    def __setup_solver(self, data: Dict, time_limit: float, output: str):
         self.model = gp.Model("Cross-Docking Model - " + self.mode)
 
         self.model.Params.TimeLimit = time_limit
-
-        if (log != ""):
-            self.model.Params.LogFile = log + "/" + data["instance"]
+        self.model.Params.LogFile = output + "/" + data["instance"] + ".txt"
+        self.model.Params.LogToConsole = 0
 
 
     def __build_model(self, data: Dict, time_unit: int, alpha: float, epsilon: float):
@@ -351,21 +350,28 @@ class CrossDockingSolver:
             Q[i] * v[i, j] for i in customers[1:-1] if i != j) + Q[j] * x["c_inbound_dock", j]) / CAP for j in
                             customers[1:-1])
 
-        self.model.ModelSense = gp.GRB.MINIMIZE
-
         if self.mode == 'single':
-            self.model.setObjectiveN(oc, index=0, priority=1, name="CO")
+            self.model.setObjective(oc, gp.GRB.MINIMIZE, name="CO")
 
         elif self.mode == 'multi':
+            self.model.ModelSense = gp.GRB.MINIMIZE
+
             self.model.setObjectiveN(oc, index=0, priority=1, name="CO")
             self.model.setObjectiveN(nv, index=1, priority=1, name="NV")
 
-        elif self.mode == 'msp':
+        elif self.mode == 'wsm':
+            self.model.ModelSense = gp.GRB.MINIMIZE
+
             oc_best = 1  # solve for alpha = 1
             nv_best = 1  # solve for alpha = 0
 
             self.model.setObjectiveN(oc / oc_best, index=0, weight=(1 - alpha), priority=1, name="CO")
             self.model.setObjectiveN(nv / nv_best, index=1, weight=(alpha)    , priority=1, name="NV")
+
+        elif self.mode == 'r-e':
+            self.model.setObjective(oc, gp.GRB.MINIMIZE, name="CO")
+            self.model.addConstr(oc <= 0 + epsilon, name="25")
+            self.model.setObjective(nv, gp.GRB.MINIMIZE, name="NV")
 
 
     def solve(self) -> None:
