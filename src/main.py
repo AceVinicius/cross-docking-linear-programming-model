@@ -15,12 +15,11 @@ def main(args):
         for mode in args.mode:
             if mode == 'wsm':
                 for alpha in args.alpha:
-                    output = args.output_dir + '/' + mode + '/alpha/' + alpha
+                    output = f'{args.output_dir}/{mode}/alpha/{alpha}'
 
                     model = Model.CrossDockingSolver(
                         data=data,
                         mode=mode,
-                        output=output,
                         alpha=alpha,
                         time_limit=args.time_limit,
                         time_unit=args.time_unit
@@ -31,12 +30,11 @@ def main(args):
 
             elif mode == 'r-e':
                 for epsilon in args.epsilon:
-                    output = args.output_dir + '/' + mode + '/epsilon/' + epsilon
+                    output = f'{args.output_dir}/{mode}/epsilon/{epsilon}'
 
                     model = Model.CrossDockingSolver(
                         data=data,
                         mode=mode,
-                        output=output,
                         epsilon=epsilon,
                         time_limit=args.time_limit,
                         time_unit=args.time_unit
@@ -46,12 +44,11 @@ def main(args):
                     model.clear()
 
             else:
-                output = args.output_dir + '/' + mode
+                output = f'{args.output_dir}/{mode}'
 
                 model = Model.CrossDockingSolver(
                     data=data,
                     mode=mode,
-                    output=output,
                     time_limit=args.time_limit,
                     time_unit=args.time_unit
                 )
@@ -59,11 +56,10 @@ def main(args):
                 model.solve()
                 model.clear()
 
-
 def get_cli_args():
     parser = argparse.ArgumentParser(
         prog='Cross Docking Linear Model',
-        description='Optimise an specific instance of cross-docking',
+        description='Optimize a specific instance of cross-docking',
         epilog='And that\'s how you\'d foo a bar'
     )
 
@@ -103,8 +99,7 @@ def get_cli_args():
         default=[0.5],
         nargs='*',
         type=float,
-        help='when \'wsm\' mode is selected, will balance how much we \
-              prioritize one objective function over another'
+        help='When \'wsm\' mode is selected, it will balance how much we prioritize one objective function over another'
     )
     parser.add_argument(
         '-e',
@@ -112,18 +107,16 @@ def get_cli_args():
         default=[0.5],
         nargs='*',
         type=float,
-        help='When \'r-e\' mode is selected, will adjust the gap on the \
-              objective functin result when it turns into a restriction'
+        help='When \'r-e\' mode is selected, it will adjust the gap on the objective function result when it turns into a restriction'
     )
     parser.add_argument(
         'instances',
         nargs='+',
         type=str,
-        help='Instances where'
+        help='Instances to optimize'
     )
 
     return parser.parse_args()
-
 
 if __name__ == '__main__':
     args = get_cli_args()

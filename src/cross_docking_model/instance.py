@@ -18,7 +18,7 @@ def skip_first_line(file: TextIO) -> None:
     """
     title = file.readline().strip()
     if title == "":
-        raise ValueError("Expected a title for next section")
+        raise ValueError("Expected a title for the next section")
 
 
 def go_to_next_info(file: TextIO) -> None:
@@ -30,15 +30,15 @@ def go_to_next_info(file: TextIO) -> None:
 
     Raises:
         ValueError: If an empty line is not found after the previous section.
-        ValueError: if a title is not found for the next section.
+        ValueError: If a title is not found for the next section.
     """
     empty_line = file.readline().strip()
     if empty_line != "":
-        raise ValueError("Expected an empty line after previous section")
+        raise ValueError("Expected an empty line after the previous section")
 
     title = file.readline().strip()
     if title == "":
-        raise ValueError("Expected a title for next section")
+        raise ValueError("Expected a title for the next section")
 
 
 def read_line_as_string(file: TextIO) -> str:
@@ -59,12 +59,12 @@ def read_line_as_string(file: TextIO) -> str:
         line = file.readline().strip()
         if not line:
             raise ValueError("Empty line read from file.")
+        
+        return line
     except ValueError as e:
         raise e
     except Exception as e:
         raise ValueError(f"Error reading line from file: {e}")
-
-    return line
 
 
 def read_line_as_int(file: TextIO) -> int:
@@ -136,10 +136,9 @@ def read_line_as_int_array(file: TextIO) -> npt.NDArray[np.int64]:
         ValueError: If the line contains non-integer values.
     """
     try:
-        data = np.array([int(x) for x in read_line_as_list(file)], dtype=int)
+        return np.array([int(x) for x in read_line_as_list(file)], dtype=int)
     except ValueError as e:
-        raise ValueError("Error reading line as integer array") from e
-    return data
+        raise ValueError(f"Error reading line as integer array: {e}")
 
 
 def read_line_as_float_array(file: TextIO) -> npt.NDArray[np.float64]:
@@ -156,14 +155,16 @@ def read_line_as_float_array(file: TextIO) -> npt.NDArray[np.float64]:
         ValueError: If the line contains non-numeric values.
     """
     try:
-        data = np.array([float(x) for x in read_line_as_list(file)], dtype=np.float64)
+        return np.array([float(x) for x in read_line_as_list(file)], dtype=np.float64)
     except ValueError as e:
-        raise ValueError(f"Error reading line as float array: {e}") from e
-
-    return data
+        raise ValueError(f"Error reading line as float array: {e}")
 
 
-def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArray[np.int64]:
+def read_lines_as_int_matrix(
+        file: TextIO,
+        rows: int,
+        cols: int
+    ) -> npt.NDArray[np.int64]:
     """
     Reads a matrix of integers from the given file.
 
@@ -179,21 +180,25 @@ def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArray[
         ValueError: If the matrix shape does not match the expected shape.
         ValueError: If there is an error reading a line as an integer array.
     """
-    matrix = np.empty((rows, cols), dtype=np.int64)
+    try:
+        matrix = np.empty((rows, cols), dtype=np.int64)
 
-    for row_index in range(rows):
-        try:
-            matrix[row_index] = np.array(read_line_as_int_array(file), dtype=np.int64)
-        except ValueError as e:
-            raise ValueError(f"Error reading line {row_index + 1} as integer array: {e}") from e
+        for row_index in range(rows):
+            matrix[row_index] = read_line_as_int_array(file)
+        
+        if matrix.shape != (rows, cols):
+            raise ValueError(f"Matrix shape {matrix.shape} does not match expected shape ({rows}, {cols})")
+        
+        return matrix
+    except Exception as e:
+        raise ValueError(f"Error reading lines as int matrix: {e}")
 
-    if matrix.shape != (rows, cols):
-        raise ValueError(f"Matrix shape {matrix.shape} does not match expected shape ({rows}, {cols})")
 
-    return matrix
-
-
-def read_lines_as_float_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArray[np.float64]:
+def read_lines_as_float_matrix(
+        file: TextIO,
+        rows: int,
+        cols: int
+    ) -> npt.NDArray[np.float64]:
     """
     Reads a matrix of floats from the given file.
 
@@ -209,18 +214,19 @@ def read_lines_as_float_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArra
         ValueError: If the matrix shape does not match the expected shape.
         ValueError: If there is an error reading a line as a float array.
     """
-    matrix = np.empty((rows, cols), dtype=np.float64)
+    try:
+        matrix = np.empty((rows, cols), dtype=np.float64)
+        
+        for row_index in range(rows):
+            array = read_line_as_float_array(file)
+            matrix[row_index] = np.array(array, dtype=np.float64)
 
-    for row_index in range(rows):
-        try:
-            matrix[row_index] = np.array(read_line_as_float_array(file), dtype=np.float64)
-        except ValueError as e:
-            raise ValueError(f"Error reading line {row_index + 1} as float array: {e}") from e
-
-    if matrix.shape != (rows, cols):
-        raise ValueError(f"Matrix shape {matrix.shape} does not match expected shape ({rows}, {cols})")
-
-    return matrix
+        if matrix.shape != (rows, cols):
+            raise ValueError(f"Matrix shape {matrix.shape} does not match expected shape ({rows}, {cols})")
+    
+        return matrix
+    except ValueError as e:
+        raise ValueError(f"Error reading lines as float array: {e}")
 
 
 def read_data(filename: str) -> Dict[str, Any]:
@@ -283,11 +289,19 @@ def read_data(filename: str) -> Dict[str, Any]:
 
         go_to_next_info(file)
         rows, cols = data['number_of_products'], data['number_of_customers']
-        data['quantity_of_required_products_per_customer'] = read_lines_as_int_matrix(file, rows, cols)
+        data['quantity_of_required_products_per_customer'] = read_lines_as_int_matrix(
+            file,
+            rows,
+            cols
+        )
 
         go_to_next_info(file)
         rows, cols = data['number_of_products'], data['number_of_suppliers']
-        data['number_of_each_product_into_inbound_loads'] = read_lines_as_int_matrix(file, rows, cols)
+        data['number_of_each_product_into_inbound_loads'] = read_lines_as_int_matrix(
+            file,
+            rows,
+            cols
+        )
 
         go_to_next_info(file)
         data['volume_of_each_product'] = read_line_as_float_array(file)
@@ -302,8 +316,19 @@ def read_data(filename: str) -> Dict[str, Any]:
         go_to_next_info(file)
         data['instance'] = read_line_as_string(file)
 
-        matrix = 0.4 * data['volume_of_each_product'][:, np.newaxis, np.newaxis] * (
-                    10 + 2 * (np.arange(data['inbound_docks'])[:, np.newaxis] - np.arange(data['outbound_docks'])))
+        volume_of_each_product = data['volume_of_each_product']
+        inbound_docks = data['inbound_docks']
+        outbound_docks = data['outbound_docks']
+
+        volume_expanded = volume_of_each_product[:, np.newaxis, np.newaxis]
+        inbound_docks_expanded = np.arange(inbound_docks)[:, np.newaxis]
+        outbound_docks_expanded = np.arange(outbound_docks)
+
+        # Calculate transfer time matrix
+        matrix = 0.4 * volume_expanded * (
+            10 + 2 * (inbound_docks_expanded - outbound_docks_expanded)
+        )
+
         data['transfer_time_for_each_product'] = matrix.astype(np.float64)
 
     return data
