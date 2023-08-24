@@ -351,7 +351,7 @@ class CrossDockingSolver:
                             customers[1:-1])
 
         if self.mode == 'single':
-            self.model.setObjective(oc, gp.GRB.MINIMIZE, name="CO")
+            self.model.setObjective(oc, gp.GRB.MINIMIZE)
 
         elif self.mode == 'multi':
             self.model.ModelSense = gp.GRB.MINIMIZE
