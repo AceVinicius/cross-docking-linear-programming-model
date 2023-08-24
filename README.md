@@ -1,8 +1,8 @@
 ## Clone repository
 
-"""
+```
 $ git clone https://github.com/AceVinicius/cross-docking-linear-programming-model.git
-"""
+```
 
 ## Enter cloned project
 
