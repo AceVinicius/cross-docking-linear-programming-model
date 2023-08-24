@@ -1,5 +1,12 @@
 import numpy as np
-from typing import Any, Dict, List, TextIO
+import numpy.typing as npt
+
+from typing import (
+    Any,
+    Dict,
+    List,
+    TextIO
+)
 
 
 def skip_first_line(file: TextIO) -> None:
@@ -115,7 +122,7 @@ def read_line_as_list(file: TextIO) -> List[str]:
     return read_line_as_string(file).split()
 
 
-def read_line_as_int_array(file: TextIO) -> np.ndarray[np.int64]:
+def read_line_as_int_array(file: TextIO) -> npt.NDArray[np.int64]:
     """
     Reads a line from a file handler and returns it as a NumPy array of integers.
 
@@ -123,7 +130,7 @@ def read_line_as_int_array(file: TextIO) -> np.ndarray[np.int64]:
         file (TextIO): The file to read from.
 
     Returns:
-        np.ndarray[np.int64]: A NumPy integer array containing the read values.
+        npt.NDArray[np.int64]: A NumPy integer array containing the read values.
 
     Raises:
         ValueError: If the line contains non-integer values.
@@ -135,7 +142,7 @@ def read_line_as_int_array(file: TextIO) -> np.ndarray[np.int64]:
     return data
 
 
-def read_line_as_float_array(file: TextIO) -> np.ndarray[np.float64]:
+def read_line_as_float_array(file: TextIO) -> npt.NDArray[np.float64]:
     """
     Reads a line of floating-point numbers from a file and returns a NumPy float array.
 
@@ -143,7 +150,7 @@ def read_line_as_float_array(file: TextIO) -> np.ndarray[np.float64]:
         file (TextIO): The file to read from.
 
     Returns:
-        np.ndarray[np.float64]: A NumPy float array containing the read values.
+        npt.NDArray[np.float64]: A NumPy float array containing the read values.
 
     Raises:
         ValueError: If the line contains non-numeric values.
@@ -156,7 +163,7 @@ def read_line_as_float_array(file: TextIO) -> np.ndarray[np.float64]:
     return data
 
 
-def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> np.ndarray[np.int64]:
+def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArray[np.int64]:
     """
     Reads a matrix of integers from the given file.
 
@@ -166,7 +173,7 @@ def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> np.ndarray[n
         cols (int): The number of columns in the matrix.
 
     Returns:
-        np.ndarray[np.int64]: The matrix of integers read from the file.
+        npt.NDArray[np.int64]: The matrix of integers read from the file.
 
     Raises:
         ValueError: If the matrix shape does not match the expected shape.
@@ -186,7 +193,7 @@ def read_lines_as_int_matrix(file: TextIO, rows: int, cols: int) -> np.ndarray[n
     return matrix
 
 
-def read_lines_as_float_matrix(file: TextIO, rows: int, cols: int) -> np.ndarray[np.float64]:
+def read_lines_as_float_matrix(file: TextIO, rows: int, cols: int) -> npt.NDArray[np.float64]:
     """
     Reads a matrix of floats from the given file.
 
@@ -196,7 +203,7 @@ def read_lines_as_float_matrix(file: TextIO, rows: int, cols: int) -> np.ndarray
         cols (int): The number of columns in the matrix.
 
     Returns:
-        np.ndarray[np.float64]: The matrix of floats as a numpy array.
+        npt.NDArray[np.float64]: The matrix of floats as a numpy array.
 
     Raises:
         ValueError: If the matrix shape does not match the expected shape.
