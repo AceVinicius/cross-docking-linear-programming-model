@@ -1,0 +1,62 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "15 clientes",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-m",
+                "single",
+                "multi",
+                "-o",
+                "solution/15clientes",
+                "-t",
+                "1800",
+                "generation/15clientes/R101/05_C15_I1_OD3_P10_S5_20_R101.txt",
+                "generation/15clientes/R101/05_C15_I1_OD3_P10_S5_40_R101.txt",
+                "generation/15clientes/R101/05_C15_I1_OD3_P10_S5_20_R101.txt"
+            ]
+        },
+        {
+            "name": "25 clientes",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-m",
+                "single",
+                "multi",
+                "-o",
+                "solution/15clientes",
+                "-t",
+                "1800",
+            ]
+        },
+        {
+            "name": "50 clientes",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-m",
+                "single",
+                "multi",
+                "-o",
+                "solution/15clientes",
+                "-t",
+                "1800",
+            ]
+        }
+    ]
+}
