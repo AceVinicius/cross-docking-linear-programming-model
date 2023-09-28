@@ -13,7 +13,7 @@ from cross_docking_model.__conversions import (
 
 
 class CrossDockingSolver:
-    __modes: List = ['single', 'multi', 'wsm', 'r-e']
+    __modes: List[str] = ['single', 'multi', 'wsm', 'r-e']
 
     mode: str
 
@@ -66,12 +66,10 @@ class CrossDockingSolver:
         # Create parameters
         PT = create_dict_from_array(data['processing_time_for_inbound_load'], suppliers)
         R = create_dict_from_2d_matrix(data['number_of_each_product_into_inbound_loads'], products, suppliers)
-        D = create_dict_from_2d_matrix(data['quantity_of_required_products_per_customer'], products,
-                                       customers[1:-1])
+        D = create_dict_from_2d_matrix(data['quantity_of_required_products_per_customer'], products, customers[1:-1])
         Q = create_dict_from_array(data['quantity_of_required_pallets_per_customer'], customers[1:-1])
         ST = create_dict_from_array(data['quantity_of_required_pallets_per_customer'] * 2, customers[1:-1])
-        TR = create_dict_from_3d_matrix(data['transfer_time_for_each_product'], products, inbound_docks,
-                                        outbound_docks)
+        TR = create_dict_from_3d_matrix(data['transfer_time_for_each_product'], products, inbound_docks, outbound_docks)
         TT = create_dict_from_2d_matrix(data['travel_time'], customers, customers)
         CT = create_dict_from_2d_matrix(data['travel_time'], customers, customers)
         A = create_dict_from_array(data['time_window_start'], customers)
@@ -150,7 +148,6 @@ class CrossDockingSolver:
             name='unloading_time_order'
         )
 
-        #     ==========================
         self.model.addConstrs(
             (
                 gp.quicksum(z_out[i, h] for h in outbound_docks) == x['c_inbound_dock', i]
@@ -192,7 +189,6 @@ class CrossDockingSolver:
             name='8'
         )
 
-        #     ==========================
         self.model.addConstrs(
             (
                 gp.quicksum(rho[p, l, f, i, h] for i in customers[1:-1] for h in outbound_docks)
@@ -358,8 +354,18 @@ class CrossDockingSolver:
 
 
         # Set objective
-        oc = gp.quicksum(CT[i, j] * x[i, j] for i in customers[:-1] for j in customers[1:] if i != j) + gp.quicksum(
-            CE * et[i] for i in customers[1:-1]) + gp.quicksum(CL * lt[i] for i in customers[1:-1]) + CO * dt_max
+        oc = gp.quicksum(
+                CT[i, j] * x[i, j]
+                for i in customers[:-1]
+                for j in customers[1:]
+                if i != j
+            ) + gp.quicksum(
+                CE * et[i]
+                for i in customers[1:-1]
+            ) + gp.quicksum(
+                CL * lt[i]
+                for i in customers[1:-1]
+            ) + CO * dt_max
         nv = gp.quicksum((CAP * x['c_inbound_dock', j] - gp.quicksum(
             Q[i] * v[i, j] for i in customers[1:-1] if i != j) + Q[j] * x['c_inbound_dock', j]) / CAP for j in
                             customers[1:-1])
@@ -373,39 +379,62 @@ class CrossDockingSolver:
             self.model.setObjectiveN(oc, index=0, priority=1, name='CO')
             self.model.setObjectiveN(nv, index=1, priority=1, name='NV')
 
+        # Ver os intervalos das funcoes isoladas pra ver se elas estao normalizando
+        # Ver os resultados dacurva de plot da funcaosf skldfjsa d
         elif self.mode == 'wsm':
-            self.model.ModelSense = gp.GRB.MINIMIZE
+            # Method 1
+            self.model.setObjective(oc, gp.GRB.MINIMIZE)
+            self.model.optimize()
+            oc_best = self.model.objVal
 
-            oc_best = 1  # solve for alpha = 1
-            nv_best = 1  # solve for alpha = 0
+            self.model.setObjective(nv, gp.GRB.MINIMIZE)
+            self.model.optimize()
+            nv_best = self.model.objVal
 
-            self.model.setObjectiveN(oc / oc_best, index=0, weight=(1 - alpha), priority=1, name='CO')
-            self.model.setObjectiveN(nv / nv_best, index=1, weight=(alpha)    , priority=1, name='NV')
+            wsm_obj = ((1 - alpha) * oc / oc_best) + (alpha * nv / nv_best)
+            self.model.setObjective(wsm_obj, gp.GRB.MINIMIZE)
+
+            # Method 2
+            self.model.setObjective(oc, gp.GRB.MINIMIZE)
+            self.model.optimize()
+            oc_val = self.model.objVal
+
+            wsm_obj = ((1 - alpha) * oc) + (alpha * 0.1 * oc_val * nv)
+            self.model.setObjective(wsm_obj, gp.GRB.MINIMIZE)
 
         elif self.mode == 'r-e':
-            self.model.setObjective(oc, gp.GRB.MINIMIZE, name='CO')
-            self.model.addConstr(oc <= 0 + epsilon, name='25')
-            self.model.setObjective(nv, gp.GRB.MINIMIZE, name='NV')
+            self.model.setObjective(oc, gp.GRB.MINIMIZE)
+            self.model.optimize()
+            oc_val = self.model.objVal
+
+            print(oc_val)
+
+            self.model.addConstr(oc <= (1 + epsilon) * oc_val, name='25')
+            self.model.setObjective(nv, gp.GRB.MINIMIZE)
 
 
     def solve(self) -> None:
         self.model.optimize()
 
-        # Print solution
-        if self.model.status == gp.GRB.OPTIMAL:
-            print('Optimal objective value(s):')
-            if self.mode == 'single':
-                print(f'Objective 1: {self.model.objVal:.4f}')
 
-            elif self.mode == 'multi':
-                print(f'Objective 1: {self.model.getObjective(0).getValue():.4f}')
-                print(f'Objective 2: {self.model.getObjective(1).getValue():.4f}')
-
-            for v in self.model.getVars():
-                print(f'{v.varName}: {v.x:.4f}')
-
-        else:
+    def print_solution(self) -> None:
+        if self.model.status != gp.GRB.OPTIMAL:
             print(f'Optimization terminated with status {str(self.model.status)}')
+            return
+
+        print('Optimal objective value(s):')
+        if self.mode == 'single':
+            print(f'Objective: {self.model.objVal:.4f}')
+
+        elif self.mode == 'multi':
+            print(f'Objective 1: {self.model.getObjective(0).getValue():.4f}')
+            print(f'Objective 2: {self.model.getObjective(1).getValue():.4f}')
+
+        elif self.mode == 'wsm':
+            print(f'Objective: {self.model.objVal:.4f}')
+
+        elif self.mode == 'r-e':
+            print(f'Objective: {self.model.objVal:.4f}')
 
 
     def clear(self) -> None:

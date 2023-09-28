@@ -1,0 +1,116 @@
+
+Gurobi 10.0.2 (linux64) logging started Wed Aug 23 22:44:26 2023
+
+Set parameter LogFile to value "solution/15clientes/single/05_C15_I1_OD3_P10_S5_20_R101.txt"
+Set parameter LogToConsole to value 0
+
+Gurobi 10.0.2 (linux64) logging started Wed Aug 23 22:44:45 2023
+
+Set parameter LogFile to value "solution/15clientes/single/05_C15_I1_OD3_P10_S5_20_R101.txt"
+Set parameter LogToConsole to value 0
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (linux64)
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 4396 rows, 8785 columns and 50766 nonzeros
+Model fingerprint: 0x040596d6
+Variable types: 7742 continuous, 1043 integer (1043 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 2e+03]
+  Objective range  [1e+00, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+03]
+Presolve removed 1012 rows and 6557 columns
+Presolve time: 0.10s
+Presolved: 3384 rows, 2228 columns, 30632 nonzeros
+Variable types: 1431 continuous, 797 integer (797 binary)
+
+Root relaxation: infeasible, 307 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 infeasible    0               - infeasible      -     -    0s
+
+Explored 1 nodes (307 simplex iterations) in 0.13 seconds (0.23 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 10.0.2 (linux64) logging started Thu Aug 24 10:52:01 2023
+
+Set parameter LogFile to value "solution/15clientes/single/05_C15_I1_OD3_P10_S5_20_R101.txt"
+Set parameter LogToConsole to value 0
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (linux64)
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 4396 rows, 8785 columns and 50766 nonzeros
+Model fingerprint: 0x040596d6
+Variable types: 7742 continuous, 1043 integer (1043 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 2e+03]
+  Objective range  [1e+00, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+03]
+Presolve removed 1012 rows and 6557 columns
+Presolve time: 0.10s
+Presolved: 3384 rows, 2228 columns, 30632 nonzeros
+Variable types: 1431 continuous, 797 integer (797 binary)
+
+Root relaxation: infeasible, 307 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 infeasible    0               - infeasible      -     -    0s
+
+Explored 1 nodes (307 simplex iterations) in 0.13 seconds (0.23 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Gurobi 10.0.2 (linux64) logging started Thu Aug 24 10:57:33 2023
+
+Set parameter LogFile to value "solution/15clientes/single/05_C15_I1_OD3_P10_S5_20_R101.txt"
+Set parameter LogToConsole to value 0
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (linux64)
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 4396 rows, 8785 columns and 50766 nonzeros
+Model fingerprint: 0x040596d6
+Variable types: 7742 continuous, 1043 integer (1043 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 2e+03]
+  Objective range  [1e+00, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+03]
+Presolve removed 1012 rows and 6557 columns
+Presolve time: 0.10s
+Presolved: 3384 rows, 2228 columns, 30632 nonzeros
+Variable types: 1431 continuous, 797 integer (797 binary)
+
+Root relaxation: infeasible, 307 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 infeasible    0               - infeasible      -     -    0s
+
+Explored 1 nodes (307 simplex iterations) in 0.12 seconds (0.23 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -

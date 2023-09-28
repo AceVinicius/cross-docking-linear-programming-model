@@ -26,6 +26,7 @@ def main(args):
                     )
 
                     model.solve()
+                    model.print_solution()
                     model.clear()
 
             elif mode == 'r-e':
@@ -41,6 +42,7 @@ def main(args):
                     )
 
                     model.solve()
+                    model.print_solution()
                     model.clear()
 
             else:
@@ -54,7 +56,9 @@ def main(args):
                 )
 
                 model.solve()
+                model.print_solution()
                 model.clear()
+
 
 def get_cli_args():
     parser = argparse.ArgumentParser(
@@ -117,6 +121,7 @@ def get_cli_args():
     )
 
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = get_cli_args()
