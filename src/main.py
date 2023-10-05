@@ -1,6 +1,8 @@
 #!/usr/bin/python3 python3.11
 
 import argparse
+import os
+from pathlib import Path
 
 from cross_docking_model import (
     instance as Instance,
@@ -15,7 +17,7 @@ def main(args):
         for mode in args.mode:
             if mode == 'wsm':
                 for alpha in args.alpha:
-                    output = f'{args.output_dir}/{mode}/alpha/{alpha}'
+                    output = f'{args.output_dir}/{mode}/alpha/{alpha}/{instance}'
 
                     model = Model.CrossDockingSolver(
                         data=data,
@@ -28,6 +30,8 @@ def main(args):
                     model.solve()
                     model.print_solution()
                     model.clear()
+
+                    write_instance_to_file(output)
 
             elif mode == 'r-e':
                 for epsilon in args.epsilon:
@@ -45,6 +49,8 @@ def main(args):
                     model.print_solution()
                     model.clear()
 
+                    write_instance_to_file(output)
+
             else:
                 output = f'{args.output_dir}/{mode}'
 
@@ -58,6 +64,22 @@ def main(args):
                 model.solve()
                 model.print_solution()
                 model.clear()
+
+                write_instance_to_file(output)
+
+
+def write_instance_to_file(filename: str):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    with open(log_file_path, 'r') as log_file:
+        with open(filename, 'w') as output_file:
+            for line in log_file:
+                output_file.write(line)
+
+    try:
+        os.remove(log_file_path)
+    except OSError:
+        pass
 
 
 def get_cli_args():
@@ -123,6 +145,14 @@ def get_cli_args():
     return parser.parse_args()
 
 
+log_file_path: str = 'grbtune.log'
+
+
 if __name__ == '__main__':
+    try:
+        os.remove(log_file_path)
+    except OSError:
+        pass
+
     args = get_cli_args()
     main(args)

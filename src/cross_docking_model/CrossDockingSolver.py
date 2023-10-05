@@ -383,16 +383,16 @@ class CrossDockingSolver:
         # Ver os resultados dacurva de plot da funcaosf skldfjsa d
         elif self.mode == 'wsm':
             # Method 1
-            self.model.setObjective(oc, gp.GRB.MINIMIZE)
-            self.model.optimize()
-            oc_best = self.model.objVal
+            # self.model.setObjective(oc, gp.GRB.MINIMIZE)
+            # self.model.optimize()
+            # oc_best = self.model.objVal
 
-            self.model.setObjective(nv, gp.GRB.MINIMIZE)
-            self.model.optimize()
-            nv_best = self.model.objVal
+            # self.model.setObjective(nv, gp.GRB.MINIMIZE)
+            # self.model.optimize()
+            # nv_best = self.model.objVal
 
-            wsm_obj = ((1 - alpha) * oc / oc_best) + (alpha * nv / nv_best)
-            self.model.setObjective(wsm_obj, gp.GRB.MINIMIZE)
+            # wsm_obj = ((1 - alpha) * oc / oc_best) + (alpha * nv / nv_best)
+            # self.model.setObjective(wsm_obj, gp.GRB.MINIMIZE)
 
             # Method 2
             self.model.setObjective(oc, gp.GRB.MINIMIZE)
